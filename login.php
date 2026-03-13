@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if (!$user || !password_verify($password, $user['password_hash'])) {
+            sleep(1);
             $errors[] = 'Invalid email or password.';
         } else {
             $_SESSION['user'] = [
