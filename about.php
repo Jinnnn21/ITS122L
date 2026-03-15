@@ -300,20 +300,50 @@
 </main>
 
 <footer class="site-footer">
-
-    <div class="footer-bottom">
-
-        <div class="footer-bottom-inner">
-
-            © 2026 Kitchen 71
-
+    <div class="container footer-inner">
+        <div>
+          <div class="brand footer-brand">
+            <span class="brand-mark">71</span>
+            <span class="brand-text">
+              <span class="brand-title">Kitchen 71</span>
+              <span class="brand-subtitle">Restaurant & Catering</span>
+            </span>
+          </div>
+          <p class="footer-text">
+            Local comfort food and event catering, now easier to discover and manage online.
+          </p>
         </div>
+        <div class="footer-columns">
+          <div>
+            <h4>Explore</h4>
+            <a href="menu.php">Menu</a>
+            <a href="catering.php">Catering</a>
+            <a href="order-online.php">Order Online</a>
+            <a href="announcements.php">Announcements</a>
+          </div>
+          <div>
+            <h4>Account</h4>
+            <?php if (current_user()): ?>
+              <a href="profile.php">My profile</a>
+            <?php else: ?>
+              <a href="login.php">Log in</a>
+              <a href="register.php">Sign up</a>
+            <?php endif; ?>
+          </div>
+          <div>
+            <h4>Connect</h4>
+            <p>Kitchen 71, [City/Location]</p>
+            <p>Facebook · Instagram · Phone</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container footer-bottom-inner">
+          <span>© 2026 Kitchen 71. Academic project website.</span>
+        </div>
+      </div>
+    </footer>
 
-    </div>
-
-</footer>
-
-<script src="assets/js/main.js"></script>
-
-</body>
+    <script src="assets/js/main.js"></script>
+  </body>
 </html>
