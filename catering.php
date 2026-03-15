@@ -2,6 +2,7 @@
 require __DIR__ . '/config.php';
 
 $user = current_user();
+$cartCount = cart_count();
 $errors = [];
 $success = false;
 
@@ -85,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
+          <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
           <?php if ($user): ?>
             <a href="profile.php" class="btn btn-ghost">My profile</a>
             <a href="logout.php" class="btn btn-primary">Log out</a>

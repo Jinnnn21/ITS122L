@@ -1,6 +1,14 @@
 <?php
 require __DIR__ . '/config.php';
 
+$cartDetails = cart_build_details($pdo);
+$cartItems = $cartDetails['items'];
+$cartSubtotal = $cartDetails['subtotal'];
+$cartCount = $cartDetails['count'];
+$cartFlash = flash_get('cart');
+$checkoutFlash = flash_get('checkout');
+$pendingPartnerCheckout = partner_checkout_get();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +43,7 @@ require __DIR__ . '/config.php';
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
+          <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
           <?php if (current_user()): ?>
             <a href="profile.php" class="btn btn-ghost">My profile</a>
             <a href="logout.php" class="btn btn-primary">Log out</a>
@@ -54,12 +63,146 @@ require __DIR__ . '/config.php';
         <h1>Order Online</h1>
         <p>
           Choose how you want to order from Kitchen 71. Order directly through our
-          website or through our delivery partners.
+          website or record your cart first before continuing to our delivery partners.
         </p>
       </div>
     </section>
 
     <main class="layout-main">
+      <section class="order-cart-overview">
+        <div class="container two-column">
+          <section class="form-card">
+            <div class="section-heading-inline">
+              <div>
+                <h2>Your cart</h2>
+                <p><?php echo $cartCount; ?> item<?php echo $cartCount === 1 ? '' : 's'; ?> selected.</p>
+              </div>
+              <a href="menu.php" class="btn btn-ghost">Add more items</a>
+            </div>
+
+            <?php if ($cartFlash): ?>
+              <div class="status-alert status-<?php echo htmlspecialchars($cartFlash['type']); ?>">
+                <?php echo htmlspecialchars($cartFlash['message']); ?>
+              </div>
+            <?php endif; ?>
+
+            <?php if ($checkoutFlash): ?>
+              <div class="status-alert status-<?php echo htmlspecialchars($checkoutFlash['type']); ?>">
+                <?php echo htmlspecialchars($checkoutFlash['message']); ?>
+              </div>
+            <?php endif; ?>
+
+            <?php if ($pendingPartnerCheckout): ?>
+              <div class="status-alert status-info">
+                <strong>Pending <?php echo htmlspecialchars(ucfirst($pendingPartnerCheckout['channel'])); ?> checkout</strong>
+                <p class="status-alert-text">
+                  Order #<?php echo (int)$pendingPartnerCheckout['order_id']; ?> was recorded on
+                  <?php echo htmlspecialchars($pendingPartnerCheckout['created_at']); ?>. Clear the cart only after you finish the order in the partner app.
+                </p>
+                <div class="status-alert-actions">
+                  <form action="cart_action.php" method="post">
+                    <input type="hidden" name="action" value="complete_partner_checkout" />
+                    <input type="hidden" name="redirect_to" value="order-online.php" />
+                    <button type="submit" class="btn btn-primary btn-small">I completed the partner order</button>
+                  </form>
+                  <form action="cart_action.php" method="post">
+                    <input type="hidden" name="action" value="cancel_partner_checkout" />
+                    <input type="hidden" name="redirect_to" value="order-online.php" />
+                    <button type="submit" class="btn btn-ghost btn-small">Keep cart, hide reminder</button>
+                  </form>
+                </div>
+              </div>
+            <?php endif; ?>
+
+            <?php if ($cartItems): ?>
+              <div class="cart-table-wrap">
+                <table class="table cart-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Price</th>
+                      <th>Qty</th>
+                      <th>Total</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($cartItems as $item): ?>
+                      <tr>
+                        <td>
+                          <div class="cart-item-name"><?php echo htmlspecialchars($item['name']); ?></div>
+                          <div class="meta-note"><?php echo htmlspecialchars($item['category_name']); ?></div>
+                        </td>
+                        <td>₱<?php echo number_format((float)$item['price'], 2); ?></td>
+                        <td>
+                          <form action="cart_action.php" method="post" class="cart-inline-form">
+                            <input type="hidden" name="action" value="update" />
+                            <input type="hidden" name="item_id" value="<?php echo (int)$item['id']; ?>" />
+                            <input type="hidden" name="redirect_to" value="order-online.php" />
+                            <input
+                              class="qty-input"
+                              type="number"
+                              name="quantity"
+                              min="0"
+                              value="<?php echo (int)$item['quantity']; ?>"
+                            />
+                            <button type="submit" class="btn btn-ghost btn-small">Update</button>
+                          </form>
+                        </td>
+                        <td>₱<?php echo number_format((float)$item['line_total'], 2); ?></td>
+                        <td>
+                          <form action="cart_action.php" method="post" class="cart-inline-form">
+                            <input type="hidden" name="action" value="remove" />
+                            <input type="hidden" name="item_id" value="<?php echo (int)$item['id']; ?>" />
+                            <input type="hidden" name="redirect_to" value="order-online.php" />
+                            <button type="submit" class="btn btn-ghost btn-small">Remove</button>
+                          </form>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="cart-summary-bar">
+                <div>
+                  <strong>Subtotal</strong>
+                  <p class="meta-note">Final delivery and service fees depend on the checkout channel.</p>
+                </div>
+                <div class="cart-summary-total">₱<?php echo number_format((float)$cartSubtotal, 2); ?></div>
+              </div>
+
+              <form action="cart_action.php" method="post" class="cart-clear-form">
+                <input type="hidden" name="action" value="clear" />
+                <input type="hidden" name="redirect_to" value="order-online.php" />
+                <button type="submit" class="btn btn-ghost">Clear cart</button>
+              </form>
+            <?php else: ?>
+              <div class="empty-state-block">
+                <p class="meta-note">Your cart is empty. Add items from the menu before checkout.</p>
+                <a href="menu.php" class="btn btn-primary">Browse menu</a>
+              </div>
+            <?php endif; ?>
+          </section>
+
+          <aside class="info-panel">
+            <h3>Checkout flow</h3>
+            <p>Choose the channel that matches how you want to finish this order.</p>
+            <ul class="info-list">
+              <li>Direct order sends your cart and customer details to Kitchen 71.</li>
+              <li>Foodpanda and GrabFood record the cart here first, then open the partner site.</li>
+              <li>You can still edit quantities before submitting.</li>
+            </ul>
+            <br>
+            <div class="chip-row order-tags">
+              <span class="chip">Cart Tracking</span>
+              <span class="chip">Partner Checkout</span>
+              <span class="chip">Direct Request</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
       <section class="order-channels">
         <div class="container">
           <div class="cards-grid three-col">
@@ -78,9 +221,13 @@ require __DIR__ . '/config.php';
                 <li>Live rider tracking</li>
                 <li>Best for regular meal delivery</li>
               </ul>
-              <a href="https://www.foodpanda.ph/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                Open Foodpanda
-              </a>
+              <form action="submit-order.php" method="post" class="order-channel-form">
+                <input type="hidden" name="checkout_action" value="partner_checkout" />
+                <input type="hidden" name="channel" value="foodpanda" />
+                <button type="submit" class="btn btn-primary" <?php echo $cartItems ? '' : 'disabled'; ?>>
+                  Record and open Foodpanda
+                </button>
+              </form>
             </article>
 
             <article class="card">
@@ -98,9 +245,13 @@ require __DIR__ . '/config.php';
                 <li>Delivery tracking</li>
                 <li>Great for nearby customers</li>
               </ul>
-              <a href="https://food.grab.com/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                Open GrabFood
-              </a>
+              <form action="submit-order.php" method="post" class="order-channel-form">
+                <input type="hidden" name="checkout_action" value="partner_checkout" />
+                <input type="hidden" name="channel" value="grabfood" />
+                <button type="submit" class="btn btn-primary" <?php echo $cartItems ? '' : 'disabled'; ?>>
+                  Record and open GrabFood
+                </button>
+              </form>
             </article>
 
             <article class="card">
@@ -124,17 +275,18 @@ require __DIR__ . '/config.php';
           </div>
         </div>
       </section>
-<br>
+
       <section id="direct-order" class="order-direct">
         <div class="container two-column">
           <section class="form-card">
             <h2>Direct Order Request</h2>
             <p>
-              Submit your direct order request. Our team will review and confirm your order
+              Submit your cart as a direct order request. Our team will review and confirm your order
               shortly.
             </p>
 
             <form action="submit-order.php" method="post">
+              <input type="hidden" name="checkout_action" value="direct_order" />
               <div class="form-grid">
                 <div class="form-field">
                   <label class="form-label" for="orderName">Full name</label>
@@ -194,29 +346,30 @@ require __DIR__ . '/config.php';
 
               <div class="form-actions">
                 <span class="meta-note order-note">
-                  Your request will be reviewed by Kitchen 71. Final confirmation depends on item
+                  Your cart will be attached to this request. Final confirmation depends on item
                   availability.
                 </span>
-                <button type="submit" class="btn btn-primary">Submit Direct Order</button>
+                <button type="submit" class="btn btn-primary" <?php echo $cartItems ? '' : 'disabled'; ?>>Submit Direct Order</button>
               </div>
             </form>
           </section>
 
           <aside class="info-panel">
-            <h3>Ordering reminders</h3>
-            <p>Important details to help your direct order request go smoothly.</p>
-            <ul class="info-list">
-              <li>Delivery app prices may vary depending on the platform.</li>
-              <li>Direct orders are ideal for advance bookings and large quantities.</li>
-              <li>Kitchen 71 may contact you to verify order details.</li>
-              <li>Payment confirmation may be required for large orders.</li>
-            </ul>
-            <br>
-            <div class="chip-row order-tags">
-              <span class="chip">Fast Delivery</span>
-              <span class="chip">Custom Orders</span>
-              <span class="chip">Advance Booking</span>
-            </div>
+            <h3>Current order summary</h3>
+            <?php if ($cartItems): ?>
+              <ul class="info-list cart-summary-list">
+                <?php foreach ($cartItems as $item): ?>
+                  <li>
+                    <strong><?php echo (int)$item['quantity']; ?>x <?php echo htmlspecialchars($item['name']); ?></strong><br>
+                    ₱<?php echo number_format((float)$item['line_total'], 2); ?>
+                  </li>
+                <?php endforeach; ?>
+              </ul>
+              <br>
+              <p><strong>Total:</strong> ₱<?php echo number_format((float)$cartSubtotal, 2); ?></p>
+            <?php else: ?>
+              <p>Add items from the menu to build your order summary.</p>
+            <?php endif; ?>
           </aside>
         </div>
       </section>

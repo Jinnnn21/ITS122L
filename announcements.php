@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/config.php';
 
+$cartCount = cart_count();
+
 $stmtEvents = $pdo->prepare('SELECT * FROM announcements WHERE is_active = 1 AND category = ? ORDER BY created_at DESC');
 $stmtEvents->execute(['event']);
 $events = $stmtEvents->fetchAll();
@@ -42,6 +44,7 @@ $news = $stmtNews->fetchAll();
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
+          <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
           <?php if (current_user()): ?>
             <a href="profile.php" class="btn btn-ghost">My profile</a>
             <a href="logout.php" class="btn btn-primary">Log out</a>

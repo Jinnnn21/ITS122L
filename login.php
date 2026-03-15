@@ -2,6 +2,7 @@
 require __DIR__ . '/config.php';
 
 $errors = [];
+$cartCount = cart_count();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
+          <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
           <a href="login.php" class="btn btn-ghost">Log in</a>
           <a href="register.php" class="btn btn-primary">Sign up</a>
         </div>

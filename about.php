@@ -1,5 +1,6 @@
 <?php
     require __DIR__ . '/config.php';
+    $cartCount = cart_count();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,6 +34,7 @@
             <a href="about.php" class="nav-link active">About</a>
         </nav>
         <div class="header-actions">
+            <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
             <?php if (current_user()): ?>
                 <a href="profile.php" class="btn btn-ghost">My profile</a>
                 <a href="logout.php" class="btn btn-primary">Log out</a>
