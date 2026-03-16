@@ -60,9 +60,3 @@ The `database.sql` file sets up the following tables:
 | `bookings`        | Catering booking requests submitted by users     |
 | `orders`          | Orders from website, Foodpanda, GrabFood, etc.   |
 | `payments`        | Payment records linked to orders or bookings     |
-
-## Known limitations
-
-- `order-online.php` and `about.php` are not yet implemented — nav links to these will return a 404.
-- The admin menu and announcements pages support Create and Delete, but do not have a pre-filled edit form for Update.
-- No CSRF protection on forms (acceptable for academic/local use).
