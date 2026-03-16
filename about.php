@@ -170,8 +170,8 @@
         </div>
         <div class="highlight-panel">
             <h3>Contact Information</h3>
-            <p>Email: kitchen71@email.com</p>
-            <p>Phone: +63 900 000 0000</p>
+            <p>Email: kitchen71catering@gmail.com</p>
+            <p>Phone: +63 917 329 7171</p>
             <p>Location: Manila, Philippines</p>
 
             <h3 style="margin-top:20px;">Order Through</h3>
@@ -226,8 +226,8 @@
           </div>
           <div>
             <h4>Connect</h4>
-            <p>Kitchen 71, [City/Location]</p>
-            <p>Facebook · Instagram · Phone</p>
+            <p>Kitchen 71, Angono, Rizal</p>
+            <p>Facebook · Instagram · +63 917 329 7171</p>
           </div>
         </div>
       </div>

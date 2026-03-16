@@ -413,8 +413,8 @@ $user = current_user();
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="container footer-inner">
+<footer class="site-footer">
+    <div class="container footer-inner">
         <div>
           <div class="brand footer-brand">
             <span class="brand-mark">71</span>
@@ -434,6 +434,7 @@ $user = current_user();
             <a href="catering.php">Catering</a>
             <a href="order-online.php">Order Online</a>
             <a href="announcements.php">Announcements</a>
+            <a href="about.php">About</a>
           </div>
           <div>
             <h4>Account</h4>
@@ -446,8 +447,8 @@ $user = current_user();
           </div>
           <div>
             <h4>Connect</h4>
-            <p>Kitchen 71, [City/Location]</p>
-            <p>Facebook · Instagram · Phone</p>
+            <p>Kitchen 71, Angono, Rizal</p>
+            <p>Facebook · Instagram · +63 917 329 7171</p>
           </div>
         </div>
       </div>
