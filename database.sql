@@ -21,6 +21,16 @@ VALUES (
   'admin'
 );
 
+INSERT INTO users (name, email, phone, password_hash, role)
+VALUES (
+  'Kitchen 71 User',
+  'user@kitchen71.local',
+  '+63 900 000 0000',
+  -- password: user123 (change in production)
+  '$2y$10$.tv/yWoGGABzh32dQ6wvXe98ok.Sn1EmqCq2UkDq9vaYJybebnihu',
+  'customer'
+);
+
 CREATE TABLE menu_categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
@@ -69,7 +79,7 @@ CREATE TABLE orders (
   source ENUM('website', 'foodpanda', 'grabfood', 'page', 'walk-in') NOT NULL DEFAULT 'website',
   summary TEXT NOT NULL,
   payment_status ENUM('pending', 'paid') NOT NULL DEFAULT 'pending',
-  status ENUM('received', 'preparing', 'ready', 'completed') NOT NULL DEFAULT 'received',
+  status ENUM('pending', 'preparing', 'ready', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );

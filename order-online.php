@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/config.php';
 
+// Logic from Menu,-Cart,-Checkout (Cart handling)
 $cartDetails = cart_build_details($pdo);
 $cartItems = $cartDetails['items'];
 $cartSubtotal = $cartDetails['subtotal'];
@@ -9,6 +10,12 @@ $cartFlash = flash_get('cart');
 $checkoutFlash = flash_get('checkout');
 $pendingPartnerCheckout = partner_checkout_get();
 
+// Logic from main (Direct Order status & User data)
+$orderSuccess = $_SESSION['order_success'] ?? null;
+$orderError = $_SESSION['order_error'] ?? null;
+unset($_SESSION['order_success'], $_SESSION['order_error']);
+
+$user = current_user();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +50,11 @@ $pendingPartnerCheckout = partner_checkout_get();
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
-          <a href="order-online.php" class="btn btn-ghost cart-link"><span class="cart-icon" aria-hidden="true">&#128722;</span><span>Cart</span><span class="cart-count"><?php echo $cartCount; ?></span></a>
+          <a href="order-online.php" class="btn btn-ghost cart-link">
+            <span class="cart-icon" aria-hidden="true">&#128722;</span>
+            <span>Cart</span>
+            <span class="cart-count"><?php echo $cartCount; ?></span>
+          </a>
           <?php if (current_user()): ?>
             <a href="profile.php" class="btn btn-ghost">My profile</a>
             <a href="logout.php" class="btn btn-primary">Log out</a>
@@ -284,21 +295,48 @@ $pendingPartnerCheckout = partner_checkout_get();
               Submit your cart as a direct order request. Our team will review and confirm your order
               shortly.
             </p>
+            <?php if ($orderSuccess): ?>
+              <p class="meta-note" style="color: #bbf7d0;"><?php echo htmlspecialchars($orderSuccess); ?></p>
+            <?php endif; ?>
+            <?php if ($orderError): ?>
+              <p class="meta-note" style="color: #fecaca;"><?php echo htmlspecialchars($orderError); ?></p>
+            <?php endif; ?>
 
             <form action="submit-order.php" method="post">
               <input type="hidden" name="checkout_action" value="direct_order" />
               <div class="form-grid">
                 <div class="form-field">
                   <label class="form-label" for="orderName">Full name</label>
-                  <input class="form-control" id="orderName" type="text" name="name" required />
+                  <input
+                    class="form-control"
+                    id="orderName"
+                    type="text"
+                    name="name"
+                    value="<?php echo htmlspecialchars($user['name'] ?? ''); ?>"
+                    required
+                  />
                 </div>
                 <div class="form-field">
                   <label class="form-label" for="orderEmail">Email address</label>
-                  <input class="form-control" id="orderEmail" type="email" name="email" required />
+                  <input
+                    class="form-control"
+                    id="orderEmail"
+                    type="email"
+                    name="email"
+                    value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>"
+                    required
+                  />
                 </div>
                 <div class="form-field">
                   <label class="form-label" for="orderContact">Contact number</label>
-                  <input class="form-control" id="orderContact" type="text" name="contact" required />
+                  <input
+                    class="form-control"
+                    id="orderContact"
+                    type="text"
+                    name="contact"
+                    value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>"
+                    required
+                  />
                 </div>
                 <div class="form-field">
                   <label class="form-label" for="orderDate">Order date</label>
@@ -374,7 +412,6 @@ $pendingPartnerCheckout = partner_checkout_get();
         </div>
       </section>
     </main>
-
 
     <footer class="site-footer">
       <div class="container footer-inner">

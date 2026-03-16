@@ -17,7 +17,6 @@ A **PHP/MySQL web application** for the Kitchen 71 restaurant and catering busin
 
 Shared styling lives in `assets/css/styles.css`, with a simple script in `assets/js/main.js` for the mobile nav and active links.
 
-> **Note:** `order-online.php` and `about.php` are linked in the nav but not yet implemented.
 
 ## Requirements
 
@@ -40,15 +39,13 @@ Shared styling lives in `assets/css/styles.css`, with a simple script in `assets
 | Email    | admin@kitchen71.local  |
 | Password | admin123               |
 
-> **Important:** If login fails after importing the SQL file, the pre-seeded password hash may not match your PHP version. To fix it, create a temporary `resetpw.php` file in the project folder:
-> ```php
-> <?php echo password_hash('admin123', PASSWORD_BCRYPT); ?>
-> ```
-> Visit `http://localhost/Kitchen71/resetpw.php`, copy the output hash, then run this in phpMyAdmin's SQL tab:
-> ```sql
-> UPDATE users SET password_hash = 'YOUR_HASH_HERE' WHERE email = 'admin@kitchen71.local';
-> ```
-> Delete `resetpw.php` once done.
+## Test customer credentials
+
+| Field    | Value                  |
+|----------|------------------------|
+| Email    | user@kitchen71.local  |
+| Password | user123               |
+
 
 ## Database
 
@@ -63,9 +60,3 @@ The `database.sql` file sets up the following tables:
 | `bookings`        | Catering booking requests submitted by users     |
 | `orders`          | Orders from website, Foodpanda, GrabFood, etc.   |
 | `payments`        | Payment records linked to orders or bookings     |
-
-## Known limitations
-
-- `order-online.php` and `about.php` are not yet implemented — nav links to these will return a 404.
-- The admin menu and announcements pages support Create and Delete, but do not have a pre-filled edit form for Update.
-- No CSRF protection on forms (acceptable for academic/local use).

@@ -37,6 +37,7 @@ $announcementCount = (int)$pdo->query('SELECT COUNT(*) FROM announcements')->fet
           <a href="index.php" class="nav-link">Site</a>
           <a href="admin.php" class="nav-link active">Dashboard</a>
           <a href="admin_menu.php" class="nav-link">Menu</a>
+          <a href="admin_orders.php" class="nav-link">Orders</a>
           <a href="admin_announcements.php" class="nav-link">Announcements</a>
         </nav>
         <div class="header-actions">
@@ -93,6 +94,7 @@ $announcementCount = (int)$pdo->query('SELECT COUNT(*) FROM announcements')->fet
               <code>orders</code> table.
             </p>
             <p class="admin-stat">Total orders: <?php echo $orderCount; ?></p>
+            <p class="admin-stat"><a href="admin_orders.php">Manage order workflow</a></p>
           </article>
 
           <article class="admin-card">

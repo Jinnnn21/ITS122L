@@ -217,6 +217,7 @@ $orders = $stmtOrders->fetchAll();
                           <?php
                           $statusClass = 'status-pending';
                           if ($o['status'] === 'completed') $statusClass = 'status-approved';
+                          if ($o['status'] === 'cancelled') $statusClass = 'status-denied';
                           ?>
                           <span class="status-pill <?php echo $statusClass; ?>">
                             <?php echo ucfirst($o['status']); ?>
@@ -233,10 +234,32 @@ $orders = $stmtOrders->fetchAll();
               </table>
             </div>
           </div>
+
+
+          
         </section>
+
+<section>
+  <div>
+        <?php if (($user['role'] ?? 'customer') === 'admin'): ?>
+          <section class="profile-card">
+            <h2>Admin access</h2>
+            <p>
+              You are signed in as an administrator. Open the admin dashboard to manage site data.
+            </p>
+            <div class="form-actions">
+              <a href="admin.php" class="btn btn-primary">Open Admin Dashboard</a>
+            </div>
+          </section>
+        <?php endif; ?>
+  </div>
+</section>
+
       </div>
     </main>
 
+
+    
     <footer class="site-footer">
       <div class="container footer-bottom-inner">
         <span>© 2026 Kitchen 71. Academic project website.</span>
