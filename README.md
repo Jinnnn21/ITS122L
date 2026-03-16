@@ -40,6 +40,13 @@ Shared styling lives in `assets/css/styles.css`, with a simple script in `assets
 | Email    | admin@kitchen71.local  |
 | Password | admin123               |
 
+## Test customer credentials
+
+| Field    | Value                  |
+|----------|------------------------|
+| Email    | user@kitchen71.local  |
+| Password | user123               |
+
 > **Important:** If login fails after importing the SQL file, the pre-seeded password hash may not match your PHP version. To fix it, create a temporary `resetpw.php` file in the project folder:
 > ```php
 > <?php echo password_hash('admin123', PASSWORD_BCRYPT); ?>

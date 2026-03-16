@@ -21,6 +21,16 @@ VALUES (
   'admin'
 );
 
+INSERT INTO users (name, email, phone, password_hash, role)
+VALUES (
+  'Kitchen 71 User',
+  'user@kitchen71.local',
+  '+63 900 000 0000',
+  -- password: user123 (change in production)
+  '$2y$10$.tv/yWoGGABzh32dQ6wvXe98ok.Sn1EmqCq2UkDq9vaYJybebnihu',
+  'customer'
+);
+
 CREATE TABLE menu_categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
