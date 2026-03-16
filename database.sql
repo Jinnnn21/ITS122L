@@ -79,7 +79,7 @@ CREATE TABLE orders (
   source ENUM('website', 'foodpanda', 'grabfood', 'page', 'walk-in') NOT NULL DEFAULT 'website',
   summary TEXT NOT NULL,
   payment_status ENUM('pending', 'paid') NOT NULL DEFAULT 'pending',
-  status ENUM('received', 'preparing', 'ready', 'completed') NOT NULL DEFAULT 'received',
+  status ENUM('pending', 'preparing', 'ready', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );

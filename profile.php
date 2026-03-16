@@ -215,6 +215,7 @@ $orders = $stmtOrders->fetchAll();
                           <?php
                           $statusClass = 'status-pending';
                           if ($o['status'] === 'completed') $statusClass = 'status-approved';
+                          if ($o['status'] === 'cancelled') $statusClass = 'status-denied';
                           ?>
                           <span class="status-pill <?php echo $statusClass; ?>">
                             <?php echo ucfirst($o['status']); ?>
