@@ -1,10 +1,16 @@
 <?php
 require __DIR__ . '/config.php';
 
+// Logic from Menu,-Cart,-Checkout branch
+$cartCount = cart_count();
+$cartFlash = flash_get('cart');
+
+// Logic from main branch (Filters & Search)
 $search = trim($_GET['q'] ?? '');
 $categoryFilter = trim($_GET['category'] ?? '');
 $sort = $_GET['sort'] ?? 'default';
 
+// Get categories for the dropdown
 $categoryStmt = $pdo->query('SELECT name FROM menu_categories ORDER BY name');
 $categories = $categoryStmt->fetchAll();
 
@@ -23,6 +29,7 @@ if ($categoryFilter !== '') {
     $params[] = $categoryFilter;
 }
 
+// Merged SQL: Includes popularity score AND image/description fields
 $sql = '
   SELECT
     mi.id,
@@ -30,7 +37,9 @@ $sql = '
     mi.description,
     mi.price,
     mi.is_available,
+    mi.image_url,
     mc.name AS category_name,
+    mc.description AS category_description,
     (
       SELECT COUNT(*)
       FROM orders o
@@ -63,6 +72,18 @@ switch ($sort) {
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $menuItems = $stmt->fetchAll();
+
+$menuByCategory = [];
+foreach ($menuItems as $item) {
+    $categoryName = $item['category_name'];
+    if (!isset($menuByCategory[$categoryName])) {
+        $menuByCategory[$categoryName] = [
+            'description' => $item['category_description'] ?? '',
+            'items' => [],
+        ];
+    }
+    $menuByCategory[$categoryName]['items'][] = $item;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,6 +118,11 @@ $menuItems = $stmt->fetchAll();
           <a href="about.php" class="nav-link">About</a>
         </nav>
         <div class="header-actions">
+          <a href="order-online.php" class="btn btn-ghost cart-link">
+            <span class="cart-icon" aria-hidden="true">&#128722;</span>
+            <span>Cart</span>
+            <span class="cart-count"><?php echo $cartCount; ?></span>
+          </a>
           <?php if (current_user()): ?>
             <a href="profile.php" class="btn btn-ghost">My profile</a>
             <a href="logout.php" class="btn btn-primary">Log out</a>
@@ -116,13 +142,14 @@ $menuItems = $stmt->fetchAll();
         <h1>Menu</h1>
         <p>
           Explore Kitchen 71’s dine-in and catering dishes. Items below are loaded from the
-          database and can be managed by the admin.
+          database and can be added to your cart for direct or partner checkout.
         </p>
       </div>
     </section>
 
     <main class="layout-main">
       <div class="container">
+        
         <section class="form-card" style="margin-bottom: 1.2rem">
           <h2>Search and filter</h2>
           <p>Find dishes by keyword, category, and sorting option.</p>
@@ -168,36 +195,84 @@ $menuItems = $stmt->fetchAll();
           </form>
         </section>
 
+        <div class="pill-filter-group" style="margin-bottom: 1rem;">
+          <span class="pill-filter active">All items</span>
+          <a href="order-online.php" class="pill-filter">Cart: <?php echo $cartCount; ?> item<?php echo $cartCount === 1 ? '' : 's'; ?></a>
+        </div>
+
         <p class="meta-note" style="margin-bottom: 1rem">
           Showing <?php echo count($menuItems); ?> result<?php echo count($menuItems) === 1 ? '' : 's'; ?>.
         </p>
 
-        <div class="menu-grid">
-          <?php if ($menuItems): ?>
-            <?php foreach ($menuItems as $item): ?>
-              <article class="menu-card">
-                <div class="menu-card-header">
-                  <h2 class="menu-card-title">
-                    <?php echo htmlspecialchars($item['name']); ?>
-                  </h2>
-                  <span class="menu-card-price">
-                    ₱<?php echo number_format((float)$item['price'], 2); ?>
-                  </span>
-                </div>
-                <p><?php echo htmlspecialchars($item['description'] ?? ''); ?></p>
-                <div class="menu-meta">
-                  <span class="badge"><?php echo htmlspecialchars($item['category_name']); ?></span>
-                  <span><?php echo $item['is_available'] ? 'Available' : 'Unavailable'; ?></span>
-                </div>
-              </article>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <p class="meta-note">
-              No menu items have been added yet. Log in as admin and use the Manage Menu Items
-              page to create entries.
-            </p>
-          <?php endif; ?>
-        </div>
+        <?php if ($cartFlash): ?>
+          <div class="status-alert status-<?php echo htmlspecialchars($cartFlash['type']); ?>">
+            <?php echo htmlspecialchars($cartFlash['message']); ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($menuByCategory): ?>
+          <?php foreach ($menuByCategory as $categoryName => $categoryData): ?>
+            <section class="menu-category-block">
+              <div class="menu-category-header">
+                <h2><?php echo htmlspecialchars($categoryName); ?></h2>
+                <?php if (!empty($categoryData['description'])): ?>
+                  <p><?php echo nl2br(htmlspecialchars($categoryData['description'])); ?></p>
+                <?php endif; ?>
+              </div>
+
+              <div class="menu-grid">
+                <?php foreach ($categoryData['items'] as $item): ?>
+                  <article class="menu-card" id="menu-item-<?php echo (int)$item['id']; ?>">
+                    <?php if (!empty($item['image_url'])): ?>
+                      <div class="menu-card-media">
+                        <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" loading="lazy" />
+                      </div>
+                    <?php endif; ?>
+                    <div class="menu-card-header">
+                      <h3 class="menu-card-title">
+                        <?php echo htmlspecialchars($item['name']); ?>
+                      </h3>
+                      <span class="menu-card-price">
+                        ₱<?php echo number_format((float)$item['price'], 2); ?>
+                      </span>
+                    </div>
+                    <p><?php echo htmlspecialchars($item['description'] ?? ''); ?></p>
+                    <div class="menu-meta">
+                      <span class="badge"><?php echo htmlspecialchars($categoryName); ?></span>
+                      <span><?php echo $item['is_available'] ? 'Available' : 'Unavailable'; ?></span>
+                    </div>
+
+                    <?php if ($item['is_available']): ?>
+                      <form action="cart_action.php" method="post" class="menu-card-actions">
+                        <input type="hidden" name="action" value="add" />
+                        <input type="hidden" name="item_id" value="<?php echo (int)$item['id']; ?>" />
+                        <input type="hidden" name="redirect_to" value="menu.php#menu-item-<?php echo (int)$item['id']; ?>" />
+                        <label class="sr-only" for="qty-<?php echo (int)$item['id']; ?>">Quantity</label>
+                        <input
+                          class="qty-input"
+                          id="qty-<?php echo (int)$item['id']; ?>"
+                          type="number"
+                          name="quantity"
+                          min="1"
+                          value="1"
+                        />
+                        <button type="submit" class="btn btn-primary">Add to cart</button>
+                      </form>
+                    <?php else: ?>
+                      <div class="menu-card-actions menu-card-actions-disabled">
+                        <span class="meta-note">This item is currently unavailable.</span>
+                      </div>
+                    <?php endif; ?>
+                  </article>
+                <?php endforeach; ?>
+              </div>
+            </section>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p class="meta-note">
+            No menu items found. Try adjusting your search filters.
+          </p>
+        <?php endif; ?>
       </div>
     </main>
 
@@ -249,4 +324,3 @@ $menuItems = $stmt->fetchAll();
     <script src="assets/js/main.js"></script>
   </body>
 </html>
-
